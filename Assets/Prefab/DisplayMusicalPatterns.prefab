@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2859787683686524663
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2859787683686524553}
+  - component: {fileID: 2859787683686524552}
+  m_Layer: 0
+  m_Name: DisplayMusicalPatterns
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2859787683686524553
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2859787683686524663}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.9350381, y: -0.14880133, z: 1.2771058}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2859787683686524552
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2859787683686524663}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 315f3eecf4e4be74b8ac218001b3db41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Sim: {fileID: 6913210191469095797, guid: 3b490c2ee37e3eb43b57c06b5c3a9353, type: 3}
+  twoEighths: {fileID: 7520447429760935543, guid: 9d907ebb1a7a7fe4695da69024eb1b08,
+    type: 3}
+  fourEighths: {fileID: 4521183550767866509, guid: 1acc842ff26ce0a498750aaea2e621bb,
+    type: 3}
+  bar: {fileID: 3401229103606079985, guid: aa507301ad1130047a8e7af81d9e23c1, type: 3}
+  dottedHalf: {fileID: 7507957757495502642, guid: 06e603ab0d755a14f893946e8276b087,
+    type: 3}
+  eighth: {fileID: 5213894194818641345, guid: baa227f8a75674142afd809dfae32d33, type: 3}
+  eighthRest: {fileID: 4640923017248717428, guid: 5c6d08c434214f24d888e7ed5220d4f2,
+    type: 3}
+  half: {fileID: 4075715285200547754, guid: 89f3cf0e49069254bbbcb4963751bc54, type: 3}
+  halfRest: {fileID: 7658023068464277908, guid: f61c3aa8ed2348a40b2e00b868c93a5c,
+    type: 3}
+  quarter: {fileID: 8419494745329519912, guid: d79b19281fd338e4bb5f969ee7da34da, type: 3}
+  quarterRest: {fileID: 3269023415876611441, guid: 4eaf391883e9af240810e96b03e5102f,
+    type: 3}
+  whole: {fileID: 6304821154172455104, guid: 98c70071e1f8ea64bb2a870c19116a58, type: 3}
+  wholeRest: {fileID: 4305081059675144709, guid: 149b17dad9e0eb94caad591b1bb5db24,
+    type: 3}
+  cursor: {fileID: 3924387345805565906, guid: 1f6e3ef1f6c5fde42a13fb346d0f61f2, type: 3}
+  text: {fileID: 3097657311074425173, guid: 9a82a935682c3284393b77bdd1b170d0, type: 3}

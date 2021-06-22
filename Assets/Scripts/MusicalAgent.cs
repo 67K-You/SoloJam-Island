@@ -8,6 +8,8 @@ public class MusicalAgent : MonoBehaviour
 {
     [Tooltip("A reference to the SimHyperParameters class")]
     public SimHyperParameters Sim;
+    [Tooltip("A reference to the DisplayMusicalPattern class")]
+    public DisplayMusicalPatterns Displayer;
     [Tooltip("The 3d text that indicates the number of the Agent")]
     public GameObject TextIndicator;
     [Tooltip("Importance of the hamming distance of an agent’s current rhythmic pattern with respect to the leader’s current rhythmic pattern.")]
@@ -26,6 +28,7 @@ public class MusicalAgent : MonoBehaviour
     public Color leaderColor = new Color(1f, 0f, .3f);
     [Tooltip("The base color of a agent's body")]
     public Color baseColor = new Color(0.7508397f, 0.3841763f, 0.6840597f);
+    public AudioClip perc;
     private bool isLeader = false;
     private bool justHandedLeadership = false;
     private bool isPlaying = false;
@@ -47,7 +50,7 @@ public class MusicalAgent : MonoBehaviour
     private double[] musicScale = { 415.3047, 440.0000, 466.1638, 493.8833, 523.2511, 554.3653, 587.3295, 622.2540 };
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         //The size of the musical pattern is defined to match the length specified in Sim
         musicalPattern = new int[Sim.getMusicalPatternLength()];
@@ -62,13 +65,10 @@ public class MusicalAgent : MonoBehaviour
     void Update()
     {
         //if statement responsible for showing the TextIndicator facing the camera and displaying the right number.
-        if (TextIndicator != null)
-        {
-            TextIndicator.transform.LookAt(Camera.main.transform.position);
-            TextIndicator.transform.Rotate(0, 180, 0);
+            
             TextIndicator.GetComponent<TextMesh>().text = agentNumber.ToString();
-            this.transform.LookAt(Vector3.ProjectOnPlane(Camera.main.transform.position, Vector3.up));
-        }
+            this.transform.LookAt(Vector3.ProjectOnPlane(Camera.main.transform.position,Vector3.up));
+
 
 
         noOneIsPlaying = true;
@@ -84,9 +84,6 @@ public class MusicalAgent : MonoBehaviour
         if (noOneIsPlaying && isLeader)
         {
             StartCoroutine(AuctionProcess());
-        }
-        if (!isLeader)
-        {
         }
     }
 
@@ -151,7 +148,7 @@ public class MusicalAgent : MonoBehaviour
     /// <summary>
     /// Compare an agent's musical pattern utility with the leader's.
     /// </summary>
-    private void compareWithLeader()
+    public void compareWithLeader()
     {
         for (int i = 0; i < agents.Length; i++)
         {
@@ -285,45 +282,65 @@ public class MusicalAgent : MonoBehaviour
     {
         //Makes the leader play its musical pattern.
         isPlaying = true;
-        for (int i = 0; i < musicalPattern.Length; i++)
+        switch(Sim.playMode)
         {
-            if (musicalPattern[i] == 0)
-            {
-                gain = 0;
-            }
-            else
-            {
-                gain = volume;
-                frequency = musicScale[random.Next(0, musicScale.Length)];
-            }
-            yield return new WaitForSeconds((float)60.0 / Sim.getBpm());
+            //When Tonal is selected the agent uses the synthesiser to play a note on the pentatonic scale
+            case SimHyperParameters.PlayMode.Tonal:
+                for (int i = 0; i < musicalPattern.Length; i++)
+                {
+                    if (musicalPattern[i] == 0)
+                    {
+                        gain = 0;
+                    }
+                    else
+                    {
+                        gain = volume;
+                        frequency = musicScale[random.Next(0, musicScale.Length)];
+                    }
+                    yield return new WaitForSeconds((float)60.0 / (2 * Sim.getBpm()));
+                    Displayer.translateCursors();
+                }
+            break;
+
+            //When atonal is selected the agent plays a percussion .wav when it needs to
+            case SimHyperParameters.PlayMode.Percussion:
+                for (int i = 0; i < musicalPattern.Length; i++)
+                {
+                    if (musicalPattern[i] == 1)
+                    {
+                        AudioSource.PlayClipAtPoint(perc, this.transform.position, 0.5f);
+                    }
+                    yield return new WaitForSeconds((float)60.0 / (2*Sim.getBpm()));
+                    Displayer.translateCursors();
+                }
+            break;
         }
+
         isPlaying = false;
         gain = 0;
         timePlaying += 1;
         //Define the utility of the leader's musical pattern
         compareWithLeader();
-        float bestBid = getUtility();
-        int bestID = agentNumber;
-        Debug.Log(bestBid);
-        Debug.Log(bestID);
         //Iterate over the other agents to try to find a candidate with a better utility
         for (int i = 0; i < agents.Length; i++)
         {
             agents[i].GetComponent<MusicalAgent>().mutation();
             agents[i].GetComponent<MusicalAgent>().compareWithLeader();
-            if (agents[i].GetComponent<MusicalAgent>().getUtility() > bestBid)
-            {
-                bestBid = agents[i].GetComponent<MusicalAgent>().getUtility();
-                bestID = agents[i].GetComponent<MusicalAgent>().getAgentNumber();
-                Debug.Log(bestBid);
-                Debug.Log(bestID);
-            }
         }
+        //The musical patterns are ranked by utility
+        Sim.updateRankedMP();
+        foreach(Canvas i in GameObject.FindObjectsOfType<Canvas>())
+        {
+            Destroy(i.gameObject);
+        }
+        //The UI shows the 5 best musical patterns
+        Displayer.showMusicalPatterns();
         //The best musician gets to be the next leader
-        leaderUpdate(bestID);
+        leaderUpdate(Sim.rankedMP[0].agentNumber);
     }
 }
+
+
 public class NotSameSize : Exception
 {
     public NotSameSize(string message) : base(message)

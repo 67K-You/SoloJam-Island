@@ -13,14 +13,18 @@ public class SimHyperParameters : MonoBehaviour
     public MusicalAgent Agent;
     [Tooltip("The BPM of the musical peformance")]
     public int bpm;
-    //
     [Tooltip("The length of the musical patterns(in beats)")]
     public int musicalPatternLength;
-
-
-    [Tooltip("An instantiation of a random number generator")]
+    
+    [Tooltip("Chooses whether the agents should play percussions or tones")]
+    public PlayMode playMode;
+    public enum PlayMode { Tonal, Percussion };
+    //List containing the musical patterns ranked by utility
+    public List<(int agentNumber,float utility, int[] musicalPattern)> rankedMP = new List<(int agentNumber, float utility, int[] musicalPattern)>();
+    //An instantiation of a random number generator
     private System.Random random=new System.Random();
     private List<MusicalAgent> AgentsList = new List<MusicalAgent>();
+    private MusicalAgent[] AgentsArray;
 
     // Start is called before the first frame update
     void Start()
@@ -56,7 +60,6 @@ public class SimHyperParameters : MonoBehaviour
             if (i == chosenOne)
             {
                 a.setIsLeader(true);
-                Debug.Log("nouveau leader");
                 a.setLeaderColor();
             }
             AgentsList.Add(a);
@@ -67,6 +70,11 @@ public class SimHyperParameters : MonoBehaviour
             agent.setAgentsArray();
         }
 
+        foreach (MusicalAgent agent in AgentsList)
+        {
+            agent.compareWithLeader();
+        }
+        updateRankedMP();     
     }
 
     public int getMusicalPatternLength()
@@ -78,9 +86,28 @@ public class SimHyperParameters : MonoBehaviour
     {
         return bpm;
     }
+
+    public List<(int agentNumber,float utility, int[] musicalPattern)> getRankedMP()
+    {
+        return rankedMP;
+    }
     // Update is called once per frame
     void Update()
     {
         
+    }
+
+    public void updateRankedMP()
+    {
+        rankedMP.Clear();
+        (int,float, int[]) values;
+        AgentsArray = FindObjectsOfType<MusicalAgent>();
+        foreach(MusicalAgent agent in AgentsArray)
+        {
+            values = (agent.getAgentNumber(), agent.getUtility(), agent.getMusicalPattern());
+            Debug.Log("value added");
+            rankedMP.Add(values);
+        }
+        rankedMP.Sort((x, y) => y.utility.CompareTo(x.utility));
     }
 }
