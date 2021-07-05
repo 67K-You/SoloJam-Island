@@ -7,10 +7,11 @@ using UnityEngine;
 public class MusicalAgent : MonoBehaviour
 {
     [Tooltip("A reference to the SimHyperParameters class")]
-    public SimHyperParameters Sim;
+    SimHyperParameters Sim;
     [Tooltip("A reference to the DisplayMusicalPattern class")]
-    public DisplayMusicalPatterns Displayer;
-    [Tooltip("The 3d text that indicates the number of the Agent")]
+    DisplayMusicalPatterns Displayer;
+    
+    [Tooltip("A class which exports the agents' utility to csv")]
     public GameObject TextIndicator;
     [Tooltip("Importance of the hamming distance of an agent’s current rhythmic pattern with respect to the leader’s current rhythmic pattern.")]
     public float a;
@@ -18,17 +19,18 @@ public class MusicalAgent : MonoBehaviour
     public float b;
     [Tooltip("Normalisation constant of the utility function")]
     public float c;
-    [Tooltip("An array of 0 and 1 containing the agent's musical pattern")]
-    private int[] musicalPattern;
-    [Tooltip("An instantiation of a random number generator")]
-    static private System.Random random = new System.Random();
     [Tooltip("The body's mesh renderer")]
+    public float eps;
     public MeshRenderer bodyMeshRenderer;
     [Tooltip("The body's color of the leader")]
     public Color leaderColor = new Color(1f, 0f, .3f);
     [Tooltip("The base color of a agent's body")]
     public Color baseColor = new Color(0.7508397f, 0.3841763f, 0.6840597f);
     public AudioClip perc;
+    //An array of 0 and 1 containing the agent's musical pattern
+    private int[] musicalPattern;
+    //An instantiation of a random number generator
+    static private System.Random random = new System.Random();
     private bool isLeader = false;
     private bool justHandedLeadership = false;
     private bool isPlaying = false;
@@ -45,13 +47,15 @@ public class MusicalAgent : MonoBehaviour
     private double phase;
     private double samplingFrequency = 48000;
     private double gain;
-    public double volume = 0.03;
+    public double volume = 0.003;
     //Pentatonic scale frequencies
     private double[] musicScale = { 415.3047, 440.0000, 466.1638, 493.8833, 523.2511, 554.3653, 587.3295, 622.2540 };
 
     // Start is called before the first frame update
     void Awake()
     {
+        Sim = FindObjectOfType<SimHyperParameters>();
+        Displayer = FindObjectOfType<DisplayMusicalPatterns>();
         //The size of the musical pattern is defined to match the length specified in Sim
         musicalPattern = new int[Sim.getMusicalPatternLength()];
         //This array is initialized randomly with 0 and 1
@@ -169,7 +173,7 @@ public class MusicalAgent : MonoBehaviour
     {
         int dl = hammingDistance(currentMP, leaderMP);
         //Utility is zero if an agent outputs the exact same pattern as the leader,or has been the leader during the previous timestep
-        if ((dl == 0 && !isLeader) || justHandedLeadership)
+        if ((dl <  eps*Sim.musicalPatternLength && !isLeader) || justHandedLeadership)
         {
             return 0;
         }
@@ -220,6 +224,38 @@ public class MusicalAgent : MonoBehaviour
                 if (random.Next() % length == 0)
                 {
                     musicalPattern[i] = Mathf.Abs(musicalPattern[i] - 1);
+                }
+            }
+        }
+    }
+
+    private void crossover()
+    {
+        if(!isLeader)
+        {
+            int length = musicalPattern.Length;
+            int[] leaderMP=(int[])musicalPattern.Clone();
+            int start = random.Next() % length;
+            int end = random.Next() % length;
+            for (int i = 0; i < agents.Length; i++)
+            {
+                if (agents[i].GetComponent<MusicalAgent>().getIsLeader())
+                {
+                    leaderMP = agents[i].GetComponent<MusicalAgent>().getMusicalPattern();
+                }
+            }
+            if(start>end)
+            {
+                for (int i = start; i < length + end;i++)
+                {
+                    musicalPattern[i % length] = leaderMP[i % length];
+                }
+            }
+            else
+            {
+                for (int i = start; i < end;i++)
+                {
+                    musicalPattern[i] = leaderMP[i];
                 }
             }
         }
@@ -324,6 +360,10 @@ public class MusicalAgent : MonoBehaviour
         //Iterate over the other agents to try to find a candidate with a better utility
         for (int i = 0; i < agents.Length; i++)
         {
+            if(Sim.crossVariant && random.Next(0,100)<Sim.crossProb)
+            {
+                agents[i].GetComponent<MusicalAgent>().crossover();
+            }
             agents[i].GetComponent<MusicalAgent>().mutation();
             agents[i].GetComponent<MusicalAgent>().compareWithLeader();
         }
@@ -335,6 +375,7 @@ public class MusicalAgent : MonoBehaviour
         }
         //The UI shows the 5 best musical patterns
         Displayer.showMusicalPatterns();
+        Sim.addCSVLine();
         //The best musician gets to be the next leader
         leaderUpdate(Sim.rankedMP[0].agentNumber);
     }

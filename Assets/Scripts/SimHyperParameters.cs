@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
 
 /// <summary>
 /// A class responsible for containing variables defining the hyperparameters of the simulation and the associated initializing methods.
@@ -19,6 +20,14 @@ public class SimHyperParameters : MonoBehaviour
     [Tooltip("Chooses whether the agents should play percussions or tones")]
     public PlayMode playMode;
     public enum PlayMode { Tonal, Percussion };
+    [Tooltip("Chooses whether or not crossovers should be used")]
+    public bool crossVariant;
+    [Tooltip("A number between 0 and 100 defining the probability of a crossover happening")]
+    public int crossProb;
+    [Tooltip("Chooses whether or not the results of the experiment should be exported to CSV")]
+    public bool recordMode;
+    [Tooltip("The name of the CSV file")]
+    public string filename;
     //List containing the musical patterns ranked by utility
     public List<(int agentNumber,float utility, int[] musicalPattern)> rankedMP = new List<(int agentNumber, float utility, int[] musicalPattern)>();
     //An instantiation of a random number generator
@@ -30,7 +39,11 @@ public class SimHyperParameters : MonoBehaviour
     void Start()
     {
         SpawnAgents();
-        Debug.Log(musicalPatternLength);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
     }
 
     /// <summary>
@@ -74,7 +87,8 @@ public class SimHyperParameters : MonoBehaviour
         {
             agent.compareWithLeader();
         }
-        updateRankedMP();     
+        updateRankedMP();
+        createCSV();
     }
 
     public int getMusicalPatternLength()
@@ -91,12 +105,12 @@ public class SimHyperParameters : MonoBehaviour
     {
         return rankedMP;
     }
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
+    public List<MusicalAgent> getAgentsList()
+    {
+        return AgentsList;
+    }
+    
     public void updateRankedMP()
     {
         rankedMP.Clear();
@@ -105,9 +119,59 @@ public class SimHyperParameters : MonoBehaviour
         foreach(MusicalAgent agent in AgentsArray)
         {
             values = (agent.getAgentNumber(), agent.getUtility(), agent.getMusicalPattern());
-            Debug.Log("value added");
             rankedMP.Add(values);
         }
         rankedMP.Sort((x, y) => y.utility.CompareTo(x.utility));
+    }
+    /// <summary>
+    /// This method fills the first line of the csv with the ID's of the agents.
+    /// </summary>
+    public void createCSV()
+    {
+        //Doesn't do anything if the session isn't recorded
+        if(!recordMode)
+        {
+            return;
+        }
+        TextWriter tw = new StreamWriter(System.IO.Directory.GetCurrentDirectory() + "\\" + filename + ".csv", false);
+        string firstLine = "";
+        for (int i = 0; i < AgentsList.Count; i++)
+        {
+            firstLine = firstLine + AgentsList[i].getAgentNumber();
+            if(i!=AgentsList.Count-1)
+            {
+                firstLine += ";";
+            }
+        }
+        tw.WriteLine(firstLine);
+        tw.Close();
+        Debug.Log("csv created");
+    }
+    /// <summary>
+    /// This method adds a line to the CSV containing the utilities of the agents in the order of their ID's 
+    /// </summary>
+    public void addCSVLine()
+    {
+        //Doesn't do anything if the session isn't recorded
+        if(!recordMode)
+        {
+            return;
+        }
+
+        TextWriter tw = new StreamWriter(System.IO.Directory.GetCurrentDirectory() + "\\"+filename+".csv", true);
+        string line = "";
+        Debug.Log(AgentsList.Count);
+        for (int i = 0; i < AgentsList.Count; i++)
+        {
+            Debug.Log(AgentsList[i].getUtility());
+            line = line + AgentsList[i].getUtility();
+            if(i!=AgentsList.Count-1)
+            {
+                line += ";";
+            }
+        }
+        tw.WriteLine(line);
+        tw.Close();
+        Debug.Log("new line added");
     }
 }

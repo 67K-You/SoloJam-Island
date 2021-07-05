@@ -43,8 +43,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5602e60109b72e043bb2ba6d62e73b41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numberOfAgents: 5
-  Agent: {fileID: 0}
+  numberOfAgents: 18
+  Agent: {fileID: 3608923233469089764, guid: 0545415f9a3cc8f42a01a5a800de9846, type: 3}
   bpm: 140
   musicalPatternLength: 16
-  playMode: 1
+  playMode: 0
+  csvWriter: {fileID: 6418787802665410443, guid: ad9aa95eae646614e9543003f5905afc,
+    type: 3}

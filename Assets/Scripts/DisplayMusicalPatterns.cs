@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class DisplayMusicalPatterns : MonoBehaviour
 {
-    public SimHyperParameters Sim;
+    SimHyperParameters Sim;
     //Canvases containing the score assets
     public Canvas twoEighths;
     public Canvas fourEighths;
@@ -29,9 +29,10 @@ public class DisplayMusicalPatterns : MonoBehaviour
     //Height of a reference musical note in pixels
     private int pixelHeight=200;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
-        
+        Sim = FindObjectOfType<SimHyperParameters>();
+        Debug.Log(Sim.getMusicalPatternLength());
     }
 
     // Update is called once per frame
@@ -45,8 +46,7 @@ public class DisplayMusicalPatterns : MonoBehaviour
         //define scale so that the musical patterns take 1/3rd of the screen
         scale = Screen.width / (3.0f * (Sim.getMusicalPatternLength() * pixelWidth));
         //shows a maximum of 5 patterns
-        Debug.Log(Sim.getRankedMP().Count);
-        int numberOfPatternsShown = Mathf.Min(4, Sim.getRankedMP().Count-1);
+        int numberOfPatternsShown = Mathf.Min(4, Sim.getRankedMP().Count);
         for (int i = 0;i<numberOfPatternsShown;i++)
         {
             printMPToPlace(Sim.getRankedMP()[i].musicalPattern,-(int)Mathf.Floor(Sim.getMusicalPatternLength() * pixelWidth * scale),(int)Mathf.Floor(((float)(numberOfPatternsShown-i)-1.0f/2.0f)*pixelHeight*scale),scale,Sim.getRankedMP()[i].agentNumber);
