@@ -5,11 +5,15 @@ TagManager:
   serializedVersion: 2
   tags:
   - MusicalAgent
+  - Cursor
+  - VisionCollider
+  - Floor
+  - mocap
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Unwalkable
   - Water
   - UI
   - 

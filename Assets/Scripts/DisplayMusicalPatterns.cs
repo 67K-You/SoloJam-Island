@@ -22,6 +22,8 @@ public class DisplayMusicalPatterns : MonoBehaviour
     public Canvas cursor;
     public Canvas text;
     private float scale;
+    //The far left x position of the HUD musical patterns
+    private int initialXPosition;
 
 
     //Width of a reference musical note in pixels
@@ -32,7 +34,6 @@ public class DisplayMusicalPatterns : MonoBehaviour
     void Awake()
     {
         Sim = FindObjectOfType<SimHyperParameters>();
-        Debug.Log(Sim.getMusicalPatternLength());
     }
 
     // Update is called once per frame
@@ -41,15 +42,16 @@ public class DisplayMusicalPatterns : MonoBehaviour
         
     }
 
-    public void showMusicalPatterns()
+    public void showMusicalPatterns(Island island)
     {
         //define scale so that the musical patterns take 1/3rd of the screen
         scale = Screen.width / (3.0f * (Sim.getMusicalPatternLength() * pixelWidth));
         //shows a maximum of 5 patterns
-        int numberOfPatternsShown = Mathf.Min(4, Sim.getRankedMP().Count);
+        int numberOfPatternsShown = Mathf.Min(4, island.getRankedMP().Count);
+        initialXPosition = -(int)Mathf.Floor(Sim.getMusicalPatternLength() * pixelWidth * scale);
         for (int i = 0;i<numberOfPatternsShown;i++)
         {
-            printMPToPlace(Sim.getRankedMP()[i].musicalPattern,-(int)Mathf.Floor(Sim.getMusicalPatternLength() * pixelWidth * scale),(int)Mathf.Floor(((float)(numberOfPatternsShown-i)-1.0f/2.0f)*pixelHeight*scale),scale,Sim.getRankedMP()[i].agentNumber);
+            printMPToPlace(island.getRankedMP()[i].musicalPattern,initialXPosition,(int)Mathf.Floor(((float)(numberOfPatternsShown-i)-1.0f/2.0f)*pixelHeight*scale),scale,island.getRankedMP()[i].agentNumber);
         }
     }
 
@@ -179,12 +181,12 @@ public class DisplayMusicalPatterns : MonoBehaviour
         }
     }
 
-    public void translateCursors()
+    public void translateCursors(int cursorPosition)
     {
         GameObject[] cursors = GameObject.FindGameObjectsWithTag("Cursor");
         for (int i = 0; i < cursors.Length;i++)
         {
-            cursors[i].transform.Find("Image").GetComponent<RectTransform>().anchoredPosition +=pixelWidth*scale*Vector2.right;
+            cursors[i].transform.Find("Image").GetComponent<RectTransform>().anchoredPosition =new Vector2(initialXPosition + pixelWidth*scale*cursorPosition,cursors[i].transform.Find("Image").GetComponent<RectTransform>().anchoredPosition.y);
         }
     }
 }
