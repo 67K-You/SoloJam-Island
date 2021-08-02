@@ -5,27 +5,26 @@ import matplotlib.pyplot as plt
 from numpy.lib.function_base import append
 
 #Script parameters
-filename="E:/Unity Projects/SoloJam Implementation/Results/30 runs comparison/N3L8A1B005C2_genP60_30I100P.csv"
-numberOfIslands=1
-numberOfAgents=3
+filename="E:/Unity Projects/SoloJam Implementation/Results/30 runs comparison/I3N3L8A1B005C2_genP60_M5_I30P100.csv"
+numberOfIslands=3
+numberOfAgents=9
 numberOfIterations=30
 numberOfMusicalPatterns=100
 
-
+#Converts the csv array obtained with the Unity simulations into a numpy array
 def csvToArray(name_of_file):
     stringdata=np.genfromtxt(name_of_file, delimiter=';',dtype=str)
-    #print(stringdata)
-    #print(np.shape(stringdata))
     data=np.empty(np.shape(stringdata),dtype=float)
     data[:] = np.nan
     for i in range (np.shape(stringdata)[0]):
         for j in range (np.shape(stringdata)[1]):
             if stringdata[i][j]=='':
-                data[i][j]=None;
+                data[i][j]=None
             else:
                 data[i][j]=float(stringdata[i][j].replace(',','.'))
     return data
-        
+
+#Return the mean performance during all of each agent and island
 def meanPerformance(dataArray,iterationsNumber,musicalPatternNumber,significanceThreshold):
     meanData=np.empty((np.shape(dataArray)[1],musicalPatternNumber+1),dtype=float)
     #"print(np.shape(meanData))
@@ -81,50 +80,87 @@ def meanMinMax(dataArray,iterationsNumber,musicalPatternNumber,significanceThres
 
 def migratingAgentsPerformance(dataArray,musicalPatternNumber):
     L=[]
-    for i in range(np.shape(dataArray)[0]):
-        for j in range(np.shape(1,dataArray[1])):
-            if(dataArray[i][j]!=None and dataArray[i-1][j]==None and (i-1)%(musicalPatternNumber+1)!=0):
-                L.append(dataArray[i][j])
+    print(np.shape(dataArray))
+    for i in range(1,np.shape(dataArray)[0]):
+        for j in range(np.shape(dataArray)[1]):
+            if(not(m.isnan(dataArray[i][j])) and m.isnan(dataArray[i-1][j]) and (i-1)%(musicalPatternNumber+1)!=0):
+                print(dataArray[i][j])
+                L.append([])
+                k=0
+                while((i+k)<np.shape(dataArray)[0] and not(m.isnan(dataArray[i+k][j]))):
+                    L[-1].append(dataArray[i+k][j])
+                    k+=1
     return L
 
+def plotMigAgentsPerf(PerfList,significancePercentage):
+    numberOfMigratingAgents=len(PerfList)
+    migAgentsPercentage=1
+    i=0
+    Y=[]
+    while(migAgentsPercentage>=significancePercentage):
+        sum=0
+        agentsLeft=0
+        for j in range(len(PerfList)):
+            if(len(PerfList[j])>i):
+                sum+=PerfList[j][i]
+                agentsLeft+=1
+        i+=1
+        if(agentsLeft==0):
+            break
+        else:
+            migAgentsPercentage=agentsLeft/numberOfMigratingAgents
+            Y.append(sum/agentsLeft)
+    X=np.linspace(1,len(Y),len(Y))
+    plt.plot(X,Y,label="Migrating agents mean utility when arriving in a new Island")
+    plt.legend(loc="upper right")
 
-def weightedMeans(dataArray,islandsNumber,agentsNumber):
-    Means=np.array(islandsNumber)
+def weightedMeans(dataArray,islandsNumber,agentsNumber,iterationNumber,mPnumber):
+    Means=np.empty(islandsNumber)
+    MeansIslandY=np.empty((islandsNumber,mPnumber))
     for i in range(islandsNumber):
         sum=0
         for j in range(1,np.shape(dataArray)[0]):
             weightedRowUtility=0
             agentsHere=0
             for k in range (agentsNumber):
-                if(dataArray[j][islandsNumber*(agentsNumber+1)+k]!=None):
-                    weightedRowUtility+=dataArray[j][islandsNumber*(agentsNumber+1)+k]
+                if(not(m.isnan(dataArray[j][i*(agentsNumber+1)+k+1]))):
+                    weightedRowUtility+=dataArray[j][i*(agentsNumber+1)+k+1]
                     agentsHere+=1
             if(agentsHere!=0):
                 weightedRowUtility=weightedRowUtility/agentsHere
+                MeansIslandY[i][(j-1)%(mPnumber+1)]+=weightedRowUtility
             sum+=weightedRowUtility
         Means[i]=sum
-    return Means
+    return Means/(iterationNumber*mPnumber),MeansIslandY/iterationNumber
 
-def plotIslandUtilities(dataArray,islandsNumber):
-    X=np.linspace(1,np.shape(dataArray)[1],np.shape(dataArray)[1]-1)
-    #print(X)
+def mergePerfs(dataVector,musicalPatternNumber):
+    Y=np.empty(musicalPatternNumber)
+    for i in range(musicalPatternNumber):
+        k=0
+        while(k*(musicalPatternNumber+1)+i<np.shape(dataVector)[0]):
+            Y[i]+=dataVector[k*(musicalPatternNumber+1)+i]
+            k+=1
+        Y[i]
+
+def plotIslandUtilities(dataArray,islandsNumber,agentsnumber,iterationNumber,musicalPatternNumber):
+    X=np.linspace(1,musicalPatternNumber,musicalPatternNumber)
     for i in range (islandsNumber):
-        for j in range(np.shape(dataArray)[0]):
-            if(j==0):
-                plt.plot(X,dataArray[j][1:],label="overall utility")
-            else:
-                plt.plot(X,dataArray[j][1:],label="agent "+str(j-1))
-    plt.legend(loc="upper right")    
-    plt.show()
+        plt.plot(X,dataArray[i],label="mean utility of Island "+str(i)+" for an Agent")
+            #else:
+                #plt.plot(X,dataArray[j][1:],label="agent "+str(j-1))
+    plt.legend(loc="upper right")
 
 
-#dataanalysis = np.loadtxt(filename,delimiter=';')
-#print("shape of data:",dataanalysis.shape)
-#print("datatype of data:",dataanalysis.dtype)
 
 
 data=csvToArray(filename)
-print(meanMinMax(data,numberOfIterations,numberOfMusicalPatterns,0.1)[0:3])
-data=meanPerformance(data,numberOfIterations,numberOfMusicalPatterns,0.1)
+print(data)
+Perf=migratingAgentsPerformance(data,numberOfMusicalPatterns)
+plotMigAgentsPerf(Perf,0.5)
+Perfs,IslandPerfs=weightedMeans(data,numberOfIslands,numberOfAgents,numberOfIterations,numberOfMusicalPatterns)
+print(Perfs)
+#plotIslandUtilities(IslandPerfs,numberOfIslands,numberOfAgents,numberOfIterations,numberOfMusicalPatterns)
+plt.show()
+#print(meanMinMax(data,numberOfIterations,numberOfMusicalPatterns,0.1)[0:3])
+#data=meanPerformance(data,numberOfIterations,numberOfMusicalPatterns,0.1)
 #print(weightedMeans(data,numberOfIslands,numberOfAgents))
-plotIslandUtilities(data,numberOfIslands)

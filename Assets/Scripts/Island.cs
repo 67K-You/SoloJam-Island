@@ -60,7 +60,7 @@ public class Island : MonoBehaviour
         {
             Debug.Log("agent " + other.transform.root.gameObject.GetComponent<MusicalAgent>().getAgentNumber().ToString() + " entered island " + islandNumber.ToString());
             other.transform.root.gameObject.GetComponent<MusicalAgent>().setIsTraveling(false);
-            other.transform.root.gameObject.GetComponent<Pathfinding>().Stop();
+            other.transform.root.gameObject.GetComponent<CustomNavMeshAgent>().ResetPath();
         }
     }
     /// <summary>
@@ -104,6 +104,12 @@ public class Island : MonoBehaviour
     {
         return ready;
     }
+    
+    public float getIslandRadius()
+    {
+        return islandRadius;
+    }
+
     /// <summary>
     /// Returns a boolean stating if the island is being pointed at by the mouse cursor.
     /// </summary>

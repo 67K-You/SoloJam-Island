@@ -4,6 +4,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
 
+//[RequireComponent(typeof(CustomNavMeshAgent))]
 public class MusicalAgent : MonoBehaviour
 {
     //A script responsible for initialising everything following the hyperparameters specified by the user.
@@ -36,9 +37,9 @@ public class MusicalAgent : MonoBehaviour
     public Color baseColor = new Color(0.7508397f, 0.3841763f, 0.6840597f);
     public AudioClip perc;
     private MeshCollider visionCollider;
+    private CustomNavMeshAgent agentNavigator;
     private float colliderRadius = 0.01f;
     //An array of 0 and 1 containing the agent's musical pattern
-    private Pathfinding pathfinder;
     private int[] musicalPattern;
     //The position of the cursor indicating at what beat the agent is playing
     private int cursorPosition = 0;
@@ -61,7 +62,7 @@ public class MusicalAgent : MonoBehaviour
     List<MusicalAgent> agents=new List<MusicalAgent>();
     //List containing the musical patterns ranked by utility
     private List<Data> rankedMP = new List<Data>();
-
+    private Vector3 currentWaypoint;
     public double frequency = 440;
     private double increment;
     private double phase;
@@ -78,7 +79,6 @@ public class MusicalAgent : MonoBehaviour
     {
         Sim = FindObjectOfType<SimHyperParameters>();
         Displayer = FindObjectOfType<DisplayMusicalPatterns>();
-        pathfinder = GetComponent<Pathfinding>();
         //The collider representing how far the agent sees.
         visionCollider = GetComponentInChildren<MeshCollider>();
         //The amount we need to scale our sensing collider so that it has a radius of sensingRadius
@@ -94,12 +94,21 @@ public class MusicalAgent : MonoBehaviour
         //The agent is added adds himself to its list of perceived agents
         agents.Add(this);
     }
+    
+    void Start()
+    {
+        StartCoroutine(NavigatorInit());
+    }
 
+    IEnumerator NavigatorInit()
+    {
+        yield return new WaitForSeconds(0.1f);
+        agentNavigator = GetComponent<CustomNavMeshAgent>();
+    }
     // Update is called once per frame
     void Update()
     {
-        //if statement responsible for showing the TextIndicator facing the camera and displaying the right number.
-            
+        //if statement responsible for showing the TextIndicator facing the camera and displaying the right number. 
         TextIndicator.GetComponent<TextMesh>().text = agentNumber.ToString();
         if(!isTraveling)
         {
@@ -154,16 +163,6 @@ public class MusicalAgent : MonoBehaviour
             MusicalAgent a = other.transform.root.gameObject.GetComponent<MusicalAgent>();
             //Remove all occurences of the the musical agent that just leaved the sensing range of this agent's agents.
             agents.RemoveAll(x => x.getAgentNumber() == a.getAgentNumber());
-        }
-    }
-
-    void OnCollisionEnter(Collision collision)
-    {
-        if (isTraveling && collision.collider.transform.root.gameObject.tag == "MusicalAgent")
-        {
-            //if the travelling agent has hit something it recalculates its path.
-            pathfinder.AstarPathing();
-            pathfinder.pathIndex = 0;
         }
     }
 
@@ -252,10 +251,6 @@ public class MusicalAgent : MonoBehaviour
         return utility;
     }
 
-    public Pathfinding getPathfinding()
-    {
-        return pathfinder;
-    }
     
     /// <summary>
     /// Compare an agent's musical pattern utility with the leader's.
@@ -611,39 +606,7 @@ public class MusicalAgent : MonoBehaviour
             islandNumber = nextIslandnumber;
             utility = 0;
             island = destination;
-            //the pathfinder aims at this new island's location
-            pathfinder.setTarget(destination.transform);
-            //A* algorithm is used to find a path
-            pathfinder.AstarPathing();
-            //A little pause so the agent can say goodbye to its friends
-            yield return new WaitForSeconds(0.5f);
-            //in worldPath the path has been broken down into a broken line and only the position of each consecutive vertex has been stored
-            Vector3 currentWaypoint = pathfinder.worldPath[0];
-            pathfinder.pathIndex = 0;
-            //while the agent has not reached its goal
-            while(pathfinder.getLookingToGo())
-            {
-                //if the agent is close enough to the vertex it can move towards the next one
-               if(Vector3.Distance(transform.position,currentWaypoint)<=0.01)
-                {
-                    pathfinder.pathIndex++;
-                    //if the is at the end goal (ie the position of an island) it stops. However there's another stop condition triggered by the island's trigger collider so this statement isn't reached under normal conditions
-                    if(pathfinder.pathIndex>=pathfinder.worldPath.Length)
-                    {
-                        pathfinder.pathIndex = 0;
-                        isTraveling = false;
-                        pathfinder.Stop();
-                        yield break;
-                   }
-                   currentWaypoint = pathfinder.worldPath[pathfinder.pathIndex];
-                }
-                transform.position = Vector3.MoveTowards(transform.position, currentWaypoint, speed*Time.deltaTime);
-                this.transform.LookAt(Vector3.ProjectOnPlane(currentWaypoint,Vector3.up));
-
-                yield return null;
-            }
-            pathfinder.pathIndex = 0;
-            yield return null;
+            agentNavigator.SetDestination(destination.transform.position);
         }
     }
 }

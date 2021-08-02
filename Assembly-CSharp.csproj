@@ -36,12 +36,9 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
-     <Compile Include="Assets\Scripts\PathFinding\Node.cs" />
      <Compile Include="Assets\Scripts\DisplayMusicalPatterns.cs" />
-     <Compile Include="Assets\Scripts\PathFinding\Pathfinding.cs" />
      <Compile Include="Assets\Scripts\FlyCamera.cs" />
      <Compile Include="Assets\Scripts\Island.cs" />
-     <Compile Include="Assets\Scripts\PathFinding\Grid.cs" />
      <Compile Include="Assets\Scripts\MusicalAgent.cs" />
      <Compile Include="Assets\Scripts\SimHyperParameters.cs" />
     <Reference Include="UnityEngine">
@@ -682,6 +679,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="CustomNavMesh.csproj">
+      <Project>{98ae78f3-97b0-6ec9-9acd-723102cfd9f6}</Project>
+      <Name>CustomNavMesh</Name>
+    </ProjectReference>
+    <ProjectReference Include="CustomNavMeshEditor.csproj">
+      <Project>{8c875325-ee1c-5ce1-4fcb-46c3a0d8be3d}</Project>
+      <Name>CustomNavMeshEditor</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

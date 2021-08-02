@@ -110,10 +110,9 @@ public class SimHyperParameters : MonoBehaviour
         //Loop responsible for placing the agents
         for (int i = 0; i < numberOfAgents; i++)
         {
-            AgentsList.Add(Instantiate(Agent) as MusicalAgent);
             //Some trigonometry to go in the right place
             float theta = i * 2 * Mathf.PI / numberOfAgents;
-            AgentsList[agentID].transform.position = new Vector3(radius * Mathf.Cos(theta) + island.transform.position.x, 0, radius * Mathf.Sin(theta) + island.transform.position.z);
+            AgentsList.Add(Instantiate(Agent, new Vector3(radius * Mathf.Cos(theta) + island.transform.position.x, 0.05f, radius * Mathf.Sin(theta) + island.transform.position.z),Quaternion.identity) as MusicalAgent);
             //Assign a unique identifier to the agent
             AgentsList[agentID].setAgentNumber(agentID);
             //Assign the number of the island it is currently in to the agent
