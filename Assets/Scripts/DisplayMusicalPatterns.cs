@@ -47,7 +47,7 @@ public class DisplayMusicalPatterns : MonoBehaviour
         //define scale so that the musical patterns take 1/3rd of the screen
         scale = Screen.width / (3.0f * (Sim.getMusicalPatternLength() * pixelWidth));
         //shows a maximum of 5 patterns
-        int numberOfPatternsShown = Mathf.Min(4, island.getRankedMP().Count);
+        int numberOfPatternsShown = Mathf.Min(5, island.getRankedMP().Count);
         initialXPosition = -(int)Mathf.Floor(Sim.getMusicalPatternLength() * pixelWidth * scale);
         for (int i = 0;i<numberOfPatternsShown;i++)
         {

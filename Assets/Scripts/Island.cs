@@ -7,13 +7,13 @@ public class Island : MonoBehaviour
 {
     public GameObject TextIndicator;
     public float islandRadius;
-    private int islandPopulation;
     private int islandNumber;
     //boolean representing whether the island is being pointed at or not
     private bool CursorOn = false;
     //Tells whether new Data that needs to be written to CSV is waiting to be transmitted
     private bool ready=false;
     private List<Data> rankedMP = new List<Data>();
+    private List<(int,float, float)> detailedUtility = new List<(int,float, float)>();
     private MeshCollider islandArea;
     private float colliderRadius = 0.01f;
     DisplayMusicalPatterns Displayer;
@@ -59,6 +59,11 @@ public class Island : MonoBehaviour
         if (other.transform.root.gameObject.tag == "MusicalAgent" && !other.isTrigger && other.transform.root.gameObject.GetComponent<MusicalAgent>().getIslandNumber()==islandNumber)
         {
             Debug.Log("agent " + other.transform.root.gameObject.GetComponent<MusicalAgent>().getAgentNumber().ToString() + " entered island " + islandNumber.ToString());
+            //This verification is put in place because when agents are instantiated at the beginning of each iteration they trigger this collider and justArrived should only be set if an agent arrives to a new Island
+            if(other.transform.root.gameObject.GetComponent<MusicalAgent>().getIsTraveling())
+            {
+                other.transform.root.gameObject.GetComponent<MusicalAgent>().setJustArrived(true);
+            }
             other.transform.root.gameObject.GetComponent<MusicalAgent>().setIsTraveling(false);
             other.transform.root.gameObject.GetComponent<CustomNavMeshAgent>().ResetPath();
         }
@@ -66,16 +71,27 @@ public class Island : MonoBehaviour
     /// <summary>
     /// Adds the musical patterns of the island's agent ranked by the leader
     /// </summary>
-    /// <param name="agentrankedMP">A list countaining the utility, agent number, and musical patterns of the agents of the island ranked by utility (agentrankedMP[0] being the best).</param>
-    public void updateRankedMP(List<Data> agentrankedMP)
+    /// <param name="agentrankedMP">A list containing the utility, agent number, and musical patterns of the agents of the island ranked by utility (agentrankedMP[0] being the best).</param>
+    public void updateRankedMP(List<Data> agentrankedMP,List<(int,float,float)> agentdetailedUtility)
     {
         rankedMP.Clear();
+        detailedUtility.Clear();
         foreach(Data element in agentrankedMP)
         {
             rankedMP.Add(element.Clone());
         }
+        foreach((int,float,float) element in agentdetailedUtility)
+        {
+            detailedUtility.Add(element);
+        }
         ready = true;
         Debug.Log(islandNumber);
+    }
+
+    public void ResetIsle()
+    {
+        rankedMP.Clear();
+        detailedUtility.Clear();
     }
 
     //SETTERS AND GETTERS
@@ -100,6 +116,10 @@ public class Island : MonoBehaviour
         return rankedMP;
     }
 
+    public List<(int,float,float)> getDetailedUtility()
+    {
+        return detailedUtility;
+    }
     public bool getReady()
     {
         return ready;

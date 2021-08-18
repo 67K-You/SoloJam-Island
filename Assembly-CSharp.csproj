@@ -41,6 +41,7 @@
      <Compile Include="Assets\Scripts\Island.cs" />
      <Compile Include="Assets\Scripts\MusicalAgent.cs" />
      <Compile Include="Assets\Scripts\SimHyperParameters.cs" />
+     <Compile Include="Assets\Scripts\MLMusicalAgent.cs" />
     <Reference Include="UnityEngine">
         <HintPath>E:/Unity 2021/2021.1.7f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
     </Reference>
@@ -271,6 +272,36 @@
     </Reference>
     <Reference Include="UnityEditor.UnityConnectModule">
         <HintPath>E:/Unity 2021/2021.1.7f1/Editor/Data/Managed/UnityEngine/UnityEditor.UnityConnectModule.dll</HintPath>
+    </Reference>
+    <Reference Include="System.IO.Abstractions">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/PackageCache/com.unity.ml-agents@1.0.8/Plugins/System.IO.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Burst.Unsafe">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/PackageCache/com.unity.burst@1.5.3/Unity.Burst.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Burst.Cecil.Mdb">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/PackageCache/com.unity.burst@1.5.3/Unity.Burst.CodeGen/Unity.Burst.Cecil.Mdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.Protobuf">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/PackageCache/com.unity.barracuda@1.0.4/Barracuda/Runtime/Plugins/ProtoBuffer/Google.Protobuf.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Burst.Cecil.Pdb">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/PackageCache/com.unity.burst@1.5.3/Unity.Burst.CodeGen/Unity.Burst.Cecil.Pdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Burst.Cecil">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/PackageCache/com.unity.burst@1.5.3/Unity.Burst.CodeGen/Unity.Burst.Cecil.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Burst.Cecil.Rocks">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/PackageCache/com.unity.burst@1.5.3/Unity.Burst.CodeGen/Unity.Burst.Cecil.Rocks.dll</HintPath>
+    </Reference>
+    <Reference Include="System.IO.Abstractions.TestingHelpers">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/PackageCache/com.unity.ml-agents@1.0.8/Plugins/System.IO.Abstractions.TestingHelpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Interactive.Async">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/PackageCache/com.unity.ml-agents@1.0.8/Plugins/ProtoBuffer/System.Interactive.Async.dll</HintPath>
+    </Reference>
+    <Reference Include="Grpc.Core">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/PackageCache/com.unity.ml-agents@1.0.8/Plugins/ProtoBuffer/Grpc.Core.dll</HintPath>
     </Reference>
     <Reference Include="netstandard">
         <HintPath>E:/Unity 2021/2021.1.7f1/Editor/Data/NetStandard/ref/2.0.0/netstandard.dll</HintPath>
@@ -617,11 +648,17 @@
     <Reference Include="System.Xml.Serialization">
         <HintPath>E:/Unity 2021/2021.1.7f1/Editor/Data/NetStandard/compat/2.0.0/shims/netfx/System.Xml.Serialization.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.ShaderGraph.Editor">
-        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.ShaderGraph.Editor.dll</HintPath>
+    <Reference Include="Unity.ML-Agents">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.ML-Agents.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Barracuda.iOSBLAS">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.Barracuda.iOSBLAS.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VisualEffectGraph.Editor">
         <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.VisualEffectGraph.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Barracuda.BurstBLAS">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.Barracuda.BurstBLAS.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VSCode.Editor">
         <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.VSCode.Editor.dll</HintPath>
@@ -632,14 +669,11 @@
     <Reference Include="Unity.VisualStudio.Editor">
         <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.VisualStudio.Editor.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.Barracuda">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.Barracuda.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.VisualEffectGraph.Runtime">
         <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.VisualEffectGraph.Runtime.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary">
-        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.Timeline.Editor">
-        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Timeline">
         <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.Timeline.dll</HintPath>
@@ -647,14 +681,14 @@
     <Reference Include="Unity.TextMeshPro">
         <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.Burst.Editor">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.Burst.Editor.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.RenderPipelines.HighDefinition.Runtime">
         <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.RenderPipelines.HighDefinition.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Searcher.Editor">
         <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.Searcher.Editor.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.HighDefinition.Config.Runtime">
-        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.RenderPipelines.HighDefinition.Config.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Unity.RenderPipelines.Core.Runtime">
         <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.RenderPipelines.Core.Runtime.dll</HintPath>
@@ -674,8 +708,41 @@
     <Reference Include="UnityEngine.UI">
         <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/UnityEngine.UI.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.Mathematics">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.Mathematics.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.ML-Agents.CommunicatorObjects">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.ML-Agents.CommunicatorObjects.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.ShaderGraph.Editor">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.ShaderGraph.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Burst">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.Burst.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Timeline.Editor">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Mathematics.Editor">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.Mathematics.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.HighDefinition.Config.Runtime">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.RenderPipelines.HighDefinition.Config.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Barracuda.Editor">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.Barracuda.Editor.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.RenderPipelines.Core.Editor">
         <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.RenderPipelines.Core.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Barracuda.MacBLAS">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.Barracuda.MacBLAS.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.ML-Agents.Editor">
+        <HintPath>E:/Unity Projects/SoloJam Implementation/Library/ScriptAssemblies/Unity.ML-Agents.Editor.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

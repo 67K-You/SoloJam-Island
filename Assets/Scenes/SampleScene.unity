@@ -210,7 +210,7 @@ PrefabInstance:
     - target: {fileID: 6913210191469095797, guid: 3b490c2ee37e3eb43b57c06b5c3a9353,
         type: 3}
       propertyPath: filename
-      value: I3N3L8A1B005C2_genP60_M5_I30P100
+      value: I3N3L8A1B005C2_I30P100
       objectReference: {fileID: 0}
     - target: {fileID: 6913210191469095797, guid: 3b490c2ee37e3eb43b57c06b5c3a9353,
         type: 3}
@@ -229,6 +229,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6913210191469095797, guid: 3b490c2ee37e3eb43b57c06b5c3a9353,
         type: 3}
+      propertyPath: mutationRate
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6913210191469095797, guid: 3b490c2ee37e3eb43b57c06b5c3a9353,
+        type: 3}
+      propertyPath: behaviourMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6913210191469095797, guid: 3b490c2ee37e3eb43b57c06b5c3a9353,
+        type: 3}
       propertyPath: numberOfAgents
       value: 3
       objectReference: {fileID: 0}
@@ -236,6 +246,26 @@ PrefabInstance:
         type: 3}
       propertyPath: numberOfIslands
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6913210191469095797, guid: 3b490c2ee37e3eb43b57c06b5c3a9353,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6913210191469095797, guid: 3b490c2ee37e3eb43b57c06b5c3a9353,
+        type: 3}
+      propertyPath: adaptationPeriod
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6913210191469095797, guid: 3b490c2ee37e3eb43b57c06b5c3a9353,
+        type: 3}
+      propertyPath: detailedfilename
+      value: I3N3L8A1B005C2_I30P100_MigDetail
+      objectReference: {fileID: 0}
+    - target: {fileID: 6913210191469095797, guid: 3b490c2ee37e3eb43b57c06b5c3a9353,
+        type: 3}
+      propertyPath: leaderMPfilename
+      value: I3N3L8A1B005C2_I30P100_LeadersMP
       objectReference: {fileID: 0}
     - target: {fileID: 6913210191469095797, guid: 3b490c2ee37e3eb43b57c06b5c3a9353,
         type: 3}
@@ -250,7 +280,7 @@ PrefabInstance:
     - target: {fileID: 6913210191469095797, guid: 3b490c2ee37e3eb43b57c06b5c3a9353,
         type: 3}
       propertyPath: migrationProbability
-      value: 5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6913210191469095797, guid: 3b490c2ee37e3eb43b57c06b5c3a9353,
         type: 3}

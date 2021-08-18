@@ -46,11 +46,18 @@ MonoBehaviour:
   numberOfIslands: 0
   island: {fileID: 95168900583698315, guid: 4800b8e3a6ecb1a448b90a4c1a2a5b55, type: 3}
   numberOfAgents: 18
-  Agent: {fileID: 3608923233469089764, guid: 0545415f9a3cc8f42a01a5a800de9846, type: 3}
+  Agent: {fileID: 7706828095505917220, guid: 0545415f9a3cc8f42a01a5a800de9846, type: 3}
   bpm: 140
   musicalPatternLength: 16
   playMode: 0
+  behaviourMode: 0
   crossVariant: 0
   crossProb: 0
+  adaptationPeriod: 0
+  migrationProbability: 0
   recordMode: 0
   filename: 
+  detailedfilename: 
+  gymMode: 0
+  numberOfIterations: 0
+  numberOfPatterns: 0

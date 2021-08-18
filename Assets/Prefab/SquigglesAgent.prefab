@@ -541,6 +541,8 @@ GameObject:
   - component: {fileID: 3608923233469089764}
   - component: {fileID: 3328425910066537229}
   - component: {fileID: 3360213259475674521}
+  - component: {fileID: 5514522358756574275}
+  - component: {fileID: 66697197425346363}
   m_Layer: 3
   m_Name: SquigglesAgent
   m_TagString: MusicalAgent
@@ -706,6 +708,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fc17bbd90af15a42a6440d84bc04b51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  agentParameters:
+    maxStep: 0
+  hasUpgradedFromAgentParameters: 1
+  MaxStep: 0
   TextIndicator: {fileID: 5652974475055108859}
   a: 1
   b: 0.05
@@ -776,3 +782,57 @@ NavMeshAgent:
   m_BaseOffset: -0.015
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 3
+--- !u!114 &5514522358756574275
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7706828095505917220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d989a168d244b34f90cd0719b3ce0e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  agentParameters:
+    maxStep: 0
+  hasUpgradedFromAgentParameters: 1
+  MaxStep: 100
+  TextIndicator: {fileID: 5652974475055108859}
+  a: 1
+  b: 0.05
+  c: 2
+  eps: 0.1
+  sensingRadius: 1.5
+  speed: 0.5
+  bodyMeshRenderer: {fileID: 2613042061032232671}
+  sensingCircleDecal: {fileID: 7164921670114839629}
+  leaderColor: {r: 1, g: 0, b: 0.3, a: 1}
+  baseColor: {r: 0.7508397, g: 0.3841763, b: 0.6840597, a: 1}
+  perc: {fileID: 8300000, guid: 71a2cb4b0fe2373458bce43ed49f7894, type: 3}
+  frequency: 440
+  volume: 0.003
+--- !u!114 &66697197425346363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7706828095505917220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d1c4e0b1822b495aa52bc52839ecb30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_BrainParameters:
+    VectorObservationSize: 18
+    NumStackedVectorObservations: 1
+    VectorActionSize: 0200000002000000020000000200000002000000020000000200000002000000
+    VectorActionDescriptions: []
+    VectorActionSpaceType: 0
+  m_Model: {fileID: 0}
+  m_InferenceDevice: 0
+  m_BehaviorType: 0
+  m_BehaviorName: MusicalAgentBehavior
+  TeamId: 0
+  m_UseChildSensors: 1

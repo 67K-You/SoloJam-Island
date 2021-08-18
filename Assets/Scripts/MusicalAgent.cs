@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
+using Unity.MLAgents;
+using Unity.MLAgents.Sensors;
 
 //[RequireComponent(typeof(CustomNavMeshAgent))]
-public class MusicalAgent : MonoBehaviour
+public class MusicalAgent : Agent
 {
     //A script responsible for initialising everything following the hyperparameters specified by the user.
-    SimHyperParameters Sim;
+    protected SimHyperParameters Sim;
     //The script responsible for showing the musical patterns in a HUD when needed.
-    DisplayMusicalPatterns Displayer;
+    protected DisplayMusicalPatterns Displayer;
     
     [Tooltip("A class which exports the agents' utility to csv")]
     public GameObject TextIndicator;
@@ -22,6 +24,7 @@ public class MusicalAgent : MonoBehaviour
     public float c;
     [Tooltip("The percentage of the musical pattern that should be different from the leader's")]
     public float eps;
+    
     [Tooltip("The radius distance at which an agent can see another agent(in meters).")]
     public float sensingRadius;
 
@@ -35,49 +38,61 @@ public class MusicalAgent : MonoBehaviour
     public Color leaderColor = new Color(1f, 0f, .3f);
     [Tooltip("The base color of a agent's body")]
     public Color baseColor = new Color(0.7508397f, 0.3841763f, 0.6840597f);
+    static protected System.Random random = new System.Random();
     public AudioClip perc;
-    private MeshCollider visionCollider;
-    private CustomNavMeshAgent agentNavigator;
-    private float colliderRadius = 0.01f;
+    protected MeshCollider visionCollider;
+    protected CustomNavMeshAgent agentNavigator;
+    protected float colliderRadius = 0.01f;
     //An array of 0 and 1 containing the agent's musical pattern
-    private int[] musicalPattern;
+    protected Vector3 initialPosition;
+    protected int[] musicalPattern;
+    //An array of 0 and 1 containing the musical pattern of the leader of the agent's previous environment
+    protected int[] formerLeaderMusicalPattern;
     //The position of the cursor indicating at what beat the agent is playing
-    private int cursorPosition = 0;
+    protected int cursorPosition = 0;
     //An instantiation of a random number generator
-    static private System.Random random = new System.Random();
-    private bool isLeader = false;
-    private bool isTraveling = false;
-    private bool justHandedLeadership = false;
-    private bool isPlaying = false;
-    private bool noOneIsPlaying;
-    private bool auctionTookPlace;
-    private int timePlaying = 0;
-    private int agentNumber;
-    private int leaderNumber;
+    protected bool isLeader = false;
+    protected bool isTraveling = false;
+    protected bool justHandedLeadership = false;
+    protected bool isPlaying = false;
+    protected bool justArrived = false;
+    protected bool noOneIsPlaying;
+    protected bool auctionTookPlace;
+    protected int timePlaying = 0;
+    protected int timeInNewIsland = 0;
+    protected int agentNumber;
     //The agent's current island
-    private Island island;
+    protected Island island;
     //The number of the island the agent is currently in
-    private int islandNumber;
-    private float utility;
-    List<MusicalAgent> agents=new List<MusicalAgent>();
+    protected int islandNumber;
+    protected float utility;
+    protected float currentIslandUtility = 0;
+    protected float formerIslandUtility = 0;
+    protected List<MusicalAgent> agents=new List<MusicalAgent>();
     //List containing the musical patterns ranked by utility
-    private List<Data> rankedMP = new List<Data>();
-    private Vector3 currentWaypoint;
+    protected List<Data> rankedMP = new List<Data>();
     public double frequency = 440;
-    private double increment;
-    private double phase;
-    private double samplingFrequency = 48000;
-    private double gain;
+    protected double increment;
+    protected double phase;
+    protected double samplingFrequency = 48000;
+    protected double gain;
     public double volume = 0.003;
     //Pentatonic scale frequencies
-    private double[] musicScale = { 415.3047, 440.0000, 466.1638, 493.8833, 523.2511, 554.3653, 587.3295, 622.2540 };
+    protected double[] musicScale = { 415.3047, 440.0000, 466.1638, 493.8833, 523.2511, 554.3653, 587.3295, 622.2540 };
 
     //Unity specific methods
 
     // Start is called before the first frame update
-    void Awake()
+    protected void Awake()
     {
         Sim = FindObjectOfType<SimHyperParameters>();
+        //The agent is added adds itself to its list of perceived agents (if behaviourMode is set to Reinforcement learning, this is done in the overrode version of the start method.)
+        if(Sim.behaviourMode==SimHyperParameters.BehaviourMode.EvolutionaryAlgorithm)
+        {
+            //The script describing the reinforcement learning behaviour of the agent is destroyed because it is not going to be used
+            Destroy(gameObject.GetComponent<MLMusicalAgent>());
+            agents.Add(this);
+        }
         Displayer = FindObjectOfType<DisplayMusicalPatterns>();
         //The collider representing how far the agent sees.
         visionCollider = GetComponentInChildren<MeshCollider>();
@@ -86,27 +101,26 @@ public class MusicalAgent : MonoBehaviour
         visionCollider.gameObject.transform.localScale = new Vector3(upscale, upscale, visionCollider.gameObject.transform.localScale.z);
         //The size of the musical pattern is defined to match the length specified in Sim
         musicalPattern = new int[Sim.getMusicalPatternLength()];
+        formerLeaderMusicalPattern = new int[Sim.getMusicalPatternLength()];
         //This array is initialized randomly with 0 and 1
         for (int i = 0; i < Sim.musicalPatternLength; i++)
         {
             musicalPattern[i] = random.Next(0, 2);
         }
-        //The agent is added adds himself to its list of perceived agents
-        agents.Add(this);
     }
     
-    void Start()
+    protected virtual void Start()
     {
-        StartCoroutine(NavigatorInit());
+        if(Sim.behaviourMode==SimHyperParameters.BehaviourMode.EvolutionaryAlgorithm)
+        {
+            StartCoroutine(NavigatorInit());
+            initialPosition = gameObject.transform.position;
+        }
     }
 
-    IEnumerator NavigatorInit()
-    {
-        yield return new WaitForSeconds(0.1f);
-        agentNavigator = GetComponent<CustomNavMeshAgent>();
-    }
+
     // Update is called once per frame
-    void Update()
+    protected void Update()
     {
         //if statement responsible for showing the TextIndicator facing the camera and displaying the right number. 
         TextIndicator.GetComponent<TextMesh>().text = agentNumber.ToString();
@@ -131,20 +145,20 @@ public class MusicalAgent : MonoBehaviour
         }
     }
 
-    void OnMouseEnter()
+    protected void OnMouseEnter()
     {
         //Show the sensing range of the agent if the mouse cursor goes over the agent
         sensingCircleDecal.size =new Vector3(2*sensingRadius,2*sensingRadius,0.18f);
     }
 
-    void OnMouseExit()
+    protected void OnMouseExit()
     {
         //Hides the sensing range of the agent if the mouse cursor leave the agent
         sensingCircleDecal.size =new Vector3(0.1f,0.1f,0.18f);
     }
 
 
-    void OnTriggerEnter(Collider other)
+    protected virtual void OnTriggerEnter(Collider other)
     {
         if(other.transform.root.gameObject.tag=="MusicalAgent")
         {
@@ -156,13 +170,56 @@ public class MusicalAgent : MonoBehaviour
         }
     }
 
-    void OnTriggerExit(Collider other)
+    protected virtual void OnTriggerExit(Collider other)
     {
         if (other.transform.root.gameObject.tag == "MusicalAgent")
         {
             MusicalAgent a = other.transform.root.gameObject.GetComponent<MusicalAgent>();
             //Remove all occurences of the the musical agent that just leaved the sensing range of this agent's agents.
             agents.RemoveAll(x => x.getAgentNumber() == a.getAgentNumber());
+        }
+    }
+
+    public virtual void ResetAgent()
+    {
+        isLeader = false;
+        isTraveling = false;
+        justHandedLeadership = false;
+        islandNumber = agentNumber / Sim.numberOfAgents;
+        justArrived = false;
+        noOneIsPlaying = false;
+        auctionTookPlace = false;
+        timePlaying = 0;
+        timeInNewIsland = 0;
+        utility = 0;
+        formerIslandUtility = 0;
+        currentIslandUtility = 0;
+        cursorPosition = 0;
+        bodyMeshRenderer.material.color = baseColor;
+        Array.Clear(formerLeaderMusicalPattern,0,formerLeaderMusicalPattern.Length);
+        //Randomly resets the musical pattern
+        for (int i = 0; i < Sim.musicalPatternLength; i++)
+        {
+            musicalPattern[i] = random.Next(0, 2);
+        }
+        agentNavigator.ResetPath();
+        gameObject.transform.position = initialPosition;
+        //the agents list containing all agent in the sensing range is reset
+        agents.Clear();
+        int initialIslandID = agentNumber / Sim.numberOfAgents;
+        foreach(var agent in Sim.getAgentsList())
+        {
+            if(initialIslandID==agent.getAgentNumber() / Sim.numberOfAgents)
+            {
+                agents.Add(agent);
+            }
+        }
+        foreach(Island isle in Sim.getIslandsList())
+        {
+            if(isle.getIslandNumber()==islandNumber)
+            {
+                island = isle;
+            }
         }
     }
 
@@ -190,11 +247,18 @@ public class MusicalAgent : MonoBehaviour
     {
         isTraveling = travelingState;
     }
+    public void setJustArrived(bool arrivedState)
+    {
+        justArrived = arrivedState;
+    }
     public void setJustHandedLeadership(bool state)
     {
         justHandedLeadership = state;
     }
-
+    public void setTimeInNewIsland(int newTime)
+    {
+        timeInNewIsland = newTime;
+    }
     public void setAgentsArray(List<MusicalAgent> agentsList)
     {
         agents = agentsList;
@@ -231,7 +295,10 @@ public class MusicalAgent : MonoBehaviour
     {
         return isTraveling;
     }
-
+    public bool getJustArrived()
+    {
+        return justArrived;
+    }
     public bool getJustHandedLeadership()
     {
         return justHandedLeadership;
@@ -250,8 +317,20 @@ public class MusicalAgent : MonoBehaviour
     {
         return utility;
     }
+    public float getFormerIslandUtility()
+    {
+        return formerIslandUtility;
+    }
 
-    
+    public float getCurrentIslandUtility()
+    {
+        return currentIslandUtility;
+    }
+    public int getTimeInNewIsland()
+    {
+        return timeInNewIsland;
+    }
+
     /// <summary>
     /// Compare an agent's musical pattern utility with the leader's.
     /// </summary>
@@ -270,12 +349,35 @@ public class MusicalAgent : MonoBehaviour
     }
 
     /// <summary>
+    /// Compute a weighted mean between the agent's musical pattern utility compared with the current leader's and agent's musical pattern utility with the last snapshot of the leader from its previous island.
+    /// This mean give higher importance to the current leader's pattern the longer the agent spends time in its new Island.
+    /// Also increments the time the agent has spent on the Island by one musical pattern each time it is called.
+    /// </summary>
+    public void compareWithFormerLeader()
+    {
+        if (!isTraveling)
+        {
+            for (int i = 0; i < agents.Count; i++)
+            {
+                if (agents[i].getIsLeader())
+                {
+                    currentIslandUtility = computeUtility(musicalPattern, agents[i].getMusicalPattern());
+                }
+            }
+            formerIslandUtility = computeUtility(musicalPattern, formerLeaderMusicalPattern);
+            //The utility is a weighted mean of the utility the agent would have had compared with the leader of its former island and the utility of the agent compared with the leader of the current group
+            utility = ((Sim.adaptationPeriod - timeInNewIsland) * formerIslandUtility + (Sim.adaptationPeriod + timeInNewIsland) * currentIslandUtility) / ((float)(2 * Sim.adaptationPeriod));
+            timeInNewIsland++;
+        }
+    }
+
+    /// <summary>
     /// Computes the utility of a musical pattern given a leader pattern.
     /// </summary>
     /// <param name="currentMP">The pattern whose utility has to be calculated</param>
     /// <param name="leaderMP">The pattern of the leader</param>
     /// <returns>The computed utility</returns>
-    private float computeUtility(int[] currentMP, int[] leaderMP)
+    protected float computeUtility(int[] currentMP, int[] leaderMP)
     {
         int dl = hammingDistance(currentMP, leaderMP);
         //Utility is zero if an agent outputs the exact same pattern as the leader,or has been the leader during the previous timestep
@@ -297,7 +399,7 @@ public class MusicalAgent : MonoBehaviour
     /// <param name="A">The first array</param>
     /// <param name="B">The second array</param>
     /// <returns>The hamming distance between those arrays</returns>
-    private int hammingDistance(int[] A, int[] B)
+    protected int hammingDistance(int[] A, int[] B)
     {
         if (A.Length != B.Length)
         {
@@ -361,7 +463,7 @@ public class MusicalAgent : MonoBehaviour
             int length = musicalPattern.Length;
             for (int i = 0; i < length; i++)
             {
-                if (random.Next() % length == 0)
+                if (random.Next(0,100) < Sim.mutationRate*length*100)
                 {
                     musicalPattern[i] = Mathf.Abs(musicalPattern[i] - 1);
                 }
@@ -370,9 +472,10 @@ public class MusicalAgent : MonoBehaviour
     }
 
     /// <summary>
-    /// Performs a 2 points genetic crossover with the agents musical pattern and the leader's
+    /// Performs a 2 points genetic crossover with the agents musical pattern and another pattern
     /// </summary>
-    private void crossover()
+    /// <param name="performWithLeader">If True performs a crossover with the pattern of the current leader, else performs a crossover with the former leaders pattern</param>
+    private void crossover(bool performWithLeader)
     {
         if(!isLeader)
         {
@@ -380,12 +483,19 @@ public class MusicalAgent : MonoBehaviour
             int[] leaderMP=(int[])musicalPattern.Clone();
             int start = random.Next() % length;
             int end = random.Next() % length;
-            for (int i = 0; i < agents.Count; i++)
+            if (performWithLeader)
             {
-                if (agents[i].getIsLeader())
+                for (int i = 0; i < agents.Count; i++)
                 {
-                    leaderMP = agents[i].getMusicalPattern();
+                    if (agents[i].getIsLeader())
+                    {
+                        leaderMP = agents[i].getMusicalPattern();
+                    }
                 }
+            }
+            else
+            {
+                leaderMP = formerLeaderMusicalPattern;
             }
             if(start>end)
             {
@@ -410,7 +520,7 @@ public class MusicalAgent : MonoBehaviour
     /// Sometimes an agent migrates to another island
     /// </summary>
     /// <param name="i">The future leader's number.</param>
-    private void leaderUpdate(int i)
+    protected void leaderUpdate(int i)
     {
         isLeader = false;
         //tells if a migration is going to happen (provided there's at least 3 agents in this island)
@@ -448,19 +558,24 @@ public class MusicalAgent : MonoBehaviour
     /// <summary>
     /// The agent gathers all the interesting information of the agents it can see, ranks this information by utility and then stores it in the island structure it belongs to.
     /// </summary>
-    private void updateRankedMP()
+    protected void updateRankedMP()
     {
         rankedMP.Clear();
-        foreach(MusicalAgent agent in agents)
+        List<(int,float,float)> detailedUtility = new List<(int,float,float)>();
+        foreach(var agent in agents)
         {
             //An agent performance is considered only if it has stopped traveling
             if(!agent.getIsTraveling())
             {
                 rankedMP.Add(new Data(agent.getAgentNumber(), agent.getUtility(), agent.getMusicalPattern()));
+                if(agent.getJustArrived())
+                {
+                    detailedUtility.Add((agent.getAgentNumber(), agent.getFormerIslandUtility(), agent.getCurrentIslandUtility()));
+                }
             }
         }
         rankedMP.Sort((x, y) => y.utility.CompareTo(x.utility));
-        island.updateRankedMP(rankedMP);
+        island.updateRankedMP(rankedMP,detailedUtility);
     }
 
     /// <summary>
@@ -468,7 +583,7 @@ public class MusicalAgent : MonoBehaviour
     /// </summary>
     /// <param name="data"></param>
     /// <param name="channel"></param>
-    private void OnAudioFilterRead(float[] data, int channel)
+    protected void OnAudioFilterRead(float[] data, int channel)
     {
         increment = frequency * 2 * Mathf.PI / samplingFrequency;
         for (int i = 0; i < data.Length; i += channel)
@@ -494,7 +609,7 @@ public class MusicalAgent : MonoBehaviour
     /// Coroutine responsible for making the auction process happening
     /// </summary>
     /// <returns></returns>
-    IEnumerator AuctionProcess()
+    protected virtual IEnumerator AuctionProcess()
     {
         //Makes the leader play its musical pattern.
         isPlaying = true;
@@ -555,12 +670,50 @@ public class MusicalAgent : MonoBehaviour
         //Iterate over the other agents to try to find a candidate with a better utility
         for (int i = 0; i < agents.Count; i++)
         {
-            if(Sim.crossVariant && random.Next(0,100)<Sim.crossProb)
+            if (!agents[i].getIsTraveling())
             {
-                agents[i].crossover();
+                if (Sim.crossVariant)
+                {
+                    if (!agents[i].getJustArrived())
+                    {
+                        if (random.Next(0, 100) < Sim.crossProb)
+                        {
+                            agents[i].crossover(true);
+                        }
+                    }
+                    else
+                    {
+                        if (random.Next(0, 100) < Sim.crossProb * (float)(Sim.adaptationPeriod + timeInNewIsland) / (2 * Sim.adaptationPeriod))
+                        {
+                            agents[i].crossover(true);
+                        }
+                        if (random.Next(0, 100) < Sim.crossProb * (float)(Sim.adaptationPeriod - timeInNewIsland) / (2 * Sim.adaptationPeriod))
+                        {
+                            agents[i].crossover(false);
+                        }
+                    }
+                }
+                agents[i].mutation();
+                if (!agents[i].getJustArrived())
+                {
+                    agents[i].compareWithLeader();
+                }
+                else
+                {
+                    if (agents[i].getTimeInNewIsland() < Sim.adaptationPeriod)
+                    {
+                        //Use the custom comparison function if the agent has not fully adapted to its group yet.
+                        agents[i].compareWithFormerLeader();
+                    }
+                    else
+                    {
+                        //After the adaptation period has passed, the agent becomes an agent just like the others in its group
+                        agents[i].setJustArrived(false);
+                        agents[i].setTimeInNewIsland(0);
+                        agents[i].compareWithLeader();
+                    }
+                }
             }
-            agents[i].mutation();
-            agents[i].compareWithLeader();
         }
         //The musical patterns are ranked by utility
         updateRankedMP();
@@ -583,11 +736,15 @@ public class MusicalAgent : MonoBehaviour
     /// Coroutine responsible for making an agent migrate randomly to another island.
     /// </summary>
     /// <returns></returns>
-    IEnumerator Migration()
+    protected IEnumerator Migration()
     {
         Debug.Log(agentNumber.ToString() +" migrates.");
-        yield return new WaitForSeconds(0.5f);
+        //A little pause of half a musical pattern so the agent can say goodbye to its friends
+        yield return new WaitForSeconds((float)(Sim.musicalPatternLength*60.0 / (4*Sim.getBpm())));
+        //The musical pattern of the Current leader is copied
+        island.getRankedMP()[0].musicalPattern.CopyTo(formerLeaderMusicalPattern,0);
         isTraveling = true;
+        utility = 0;
         //Randomly choose another island
         int nextIslandnumber=(islandNumber + random.Next(1, Sim.numberOfIslands))%Sim.numberOfIslands;
         Island[] islands = FindObjectsOfType<Island>();
@@ -604,10 +761,19 @@ public class MusicalAgent : MonoBehaviour
         {
             //now the agent belongs to the newly chosen island
             islandNumber = nextIslandnumber;
-            utility = 0;
             island = destination;
             agentNavigator.SetDestination(destination.transform.position);
         }
+    }
+
+    /// <summary>
+    /// Store the navMesh component into agentNavigator so it can be accessed later (needs to wait a bit because the navigation component is instantiated on the first frame).
+    /// </summary>
+    /// <returns></returns>
+    protected IEnumerator NavigatorInit()
+    {
+        yield return new WaitForSeconds(0.1f);
+        agentNavigator = GetComponent<CustomNavMeshAgent>();
     }
 }
 
