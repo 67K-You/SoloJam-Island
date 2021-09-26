@@ -33,17 +33,17 @@ Most of the simulation parameters can be set through public variables in the Sim
 
 ![](Pictures/SimParametersVariables.PNG)
 
-- **Number Of Islands** sets the number of Islands in the simulation.;
-- **Number Of Agents** tells how many agents are initialized on each Island at the begining of each run.;
-- **Bpm** is the number of beats per minute at which agents play their musical patterns.;
-- **Musical Pattern Length** is the number of beats each musical patterns contains.;
-- **Cross variant** enables or disables crossovers between an agent's musical pattern and the musical pattern of the leader of their Island. If it is enabled, these crossovers happen with a probability **Cross Prob** (in percents).;
-- **Mutation Rate** indicates on average the number of bits that are being flipped after each mutation.;
-- **Adaptation period** sets the number of musical patterns a migrating agent needs to adapt to their new Island.;
-- **Migration Probability** is the probability for a migration to be initiated after each auction.;
-- **Record Mode** enables or disables exports of the simulation results to csv.;
-- **Gym Mode** enables/disables the repetition of multiple runs with a set **Number Of Patterns**.;
-- **Simulation Speed** speeds up the simulation by this factor.;
+- **Number Of Islands** sets the number of Islands in the simulation.
+- **Number Of Agents** tells how many agents are initialized on each Island at the begining of each run.
+- **Bpm** is the number of beats per minute at which agents play their musical patterns.
+- **Musical Pattern Length** is the number of beats each musical patterns contains.
+- **Cross variant** enables or disables crossovers between an agent's musical pattern and the musical pattern of the leader of their Island. If it is enabled, these crossovers happen with a probability **Cross Prob** (in percents).
+- **Mutation Rate** indicates on average the number of bits that are being flipped after each mutation.
+- **Adaptation period** sets the number of musical patterns a migrating agent needs to adapt to their new Island.
+- **Migration Probability** is the probability for a migration to be initiated after each auction.
+- **Record Mode** enables or disables exports of the simulation results to csv.
+- **Gym Mode** enables/disables the repetition of multiple runs with a set **Number Of Patterns**.
+- **Simulation Speed** speeds up the simulation by this factor.
 
 Hyper parameters of the classical SoloJam algorithm can be set in the SquigglesAgent prefab through public variables.
 
