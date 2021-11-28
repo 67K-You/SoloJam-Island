@@ -53,3 +53,7 @@ This simulator is built on Unity 2021.1.7f1 and uses Unity’s High-Definition R
 to render the agents’ sensing range therefore this package needs to be included in your
 Unity project. The not yet functional Unity ML-Agents based behavior of the musical
 agents also necessitates ML-Agents version 1.0.8.
+
+If you use SoloJam Island to conduct research, we ask that you cite the following paper as a reference:
+
+Potel, P., Veenstra, F., Glette, K. (2021). SoloJam Island : a platform for rhythmic experimentation in spatially segmented multi-agent systems. Proceedings of the Nordic Sound and Music Computing Conference 2021. [Paper](https://nordicsmc.create.aau.dk/wp-content/NordicSMC/Nordic_SMC_2021_paper_22.pdf)
